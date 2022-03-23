@@ -14,17 +14,23 @@ function love.load()
     coefficent_innovation=0.01
     coefficent_risparmio=0
     Pop={food=500, number=10, t_1=0, money=0, salary=20}
-    ananas={output=0.9,value=3}
-    Pop1=Pop
-    Pops={}
-    for i= 1,3 do
-        Pops[i]=Pop
+    function Pop:new (o)
+        o = o or {}   -- create object if user does not provide one
+        setmetatable(o, self)
+        self.__index = self
+        return o
     end
+    ananas={output=0.9,value=3}
+    Pops={}
+    for i= 1,3 do 
+        Pops[i]=Pop:new{food=500, number=10, t_1=0, money=0, salary=20}
+    end
+
 
     farm_industry= {pops=Pops, out=0 ,size=1, food_type=ananas, capital=0, dividends_rate=0.5}
 
 
-    function farm_industry.Update()
+    function farm_industry:Update()
         function farm_industry.Output()
             farm_industry.out=farm_industry.pops[1].number*farm_industry.food_type.output 
         end
@@ -49,7 +55,7 @@ function love.load()
 
         function farm_industry.Investment()
             farm_industry.dividends=farm_industry.capital*farm_industry.dividends_rate
-            farm_industry.pops[3]=farm_industry.pops[3].money+(farm_industry.dividends/farm_industry.pops[3].number)
+            farm_industry.pops[2].money=farm_industry.pops[2].money+(farm_industry.dividends/farm_industry.pops[2].number)
         end
 
         farm_industry.Output()
@@ -57,38 +63,44 @@ function love.load()
         farm_industry.Expences()
         farm_industry.Balance()
         farm_industry.Capital()
+        farm_industry.Investment()
     end
 
 
     function throughtput(pop,cylces)
-        x=(math.pow((1/1.01),pop)+(math.cos(pop)+1)/50+ math.random(0.1,0.2))*(multi);  
+        x=((1/1.01)^pop+(math.cos(pop)+1)/50+ math.random(0.1,0.2))*(multi);  
         return x
     end
 
+
+
     function Pop.Update()
         function Pop.Food()
-            Pop.t_1=throughtput(Pop.number,cycles)
-            food_produced=(Pop.number+1)*Pop.t_1
-            food_consumed=(food_consumed_pop+math.log(Pop.number+1))*Pop.number
-            delta=food_produced-food_consumed
-            Pop.food=Pop.food+delta
-            if Pop.food<0 then
-                Pop.food=0
+            Pop.food_need=Pop.number*2
+            Pop.food_need_cost=Pop.food_need*ananas.value
+            if Pop.money > Pop.food_need_cost then
+                Pop.money = Pop.money - food_need_cost
+                Pop.food_supply=100
+            else
+                Pop.food_supply=((Pop.money/ananas.value)/Pop.food_need)*100
+                Pop.money=0
             end
+ 
         end
         function Pop.Change()
-            pops_variation=math.floor(((Pop.food+delta)/food_consumed_pop)/5)
-            Pop.number=Pop.number+pops_variation
-            if Pop.number<=0 then
-                Pop.number=1
+            if Pop.food_supply >80 then
+                Pop.number=Pop.number+1
             end
+            if Pop.food_supply<40 then
+                Pop.number=Pop.number-1
+            end
+
         end
         Pop.Food()
         Pop.Change()
 
     end
-    
- 
+
 end
 
 
@@ -104,9 +116,11 @@ end
 
 function love.update(dt)
         farm_industry.Update()
-        for i= 1,3 do
-            farm_industry.pops[i].Update()
-        end
+
+        farm_industry.pops[1].Update()
+
+
+
         cycles=cycles+1
 end
 
@@ -115,13 +129,15 @@ function love.draw()
     love.graphics.setColor(1,0,0)
     love.graphics.setColor(1,1,1)
     love.graphics.print(cycles,font,0,150) 
+    --[[
     for i= 1,3 do
         love.graphics.print( string.format(
             "%.2f", Pops[i].food ),font,100*i,0) 
         love.graphics.print(Pops[i].number,font,100*i,50)
     end
-    love.graphics.print(farm_industry.pops[1].money,font,400,50)
-    love.graphics.print(farm_industry.pops[2].money,font,400,100)
+    ]]
+    love.graphics.print(farm_industry.pops[1].food_need,font,400,50)
+    love.graphics.print(farm_industry.pops[2]['money'],font,400,100)
     love.graphics.print(farm_industry.salary_expence,font,400,150)
 
 end
