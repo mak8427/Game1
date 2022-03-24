@@ -13,34 +13,35 @@ function love.load()
     cycles=0
     coefficent_innovation=0.01
     coefficent_risparmio=0
-    Pop={food=500, number=10, t_1=0, money=0, salary=20}
+    farm_industry= {pop_salary=20}
+    Pop={food=500, number=10, t_1=0, money=100, salary=10, food_supply=100, work_industry=farm_industry}
     function Pop:new (o)
         o = o or {}   -- create object if user does not provide one
         setmetatable(o, self)
         self.__index = self
         return o
     end
-    ananas={output=0.9,value=3}
+    ananas={output=0.9,value=3,produced=0,sold=0,stock=0}
     Pops={}
     for i= 1,3 do 
-        Pops[i]=Pop:new{food=500, number=10, t_1=0, money=0, salary=20}
+        Pops[i]=Pop:new{}
     end
 
 
-    farm_industry= {pops=Pops, out=0 ,size=1, food_type=ananas, capital=0, dividends_rate=0.5}
+    farm_industry= {pops=Pops, out=0 ,size=1, food_type=ananas, capital=0, dividends_rate=0.5, pop_salary=20}
 
 
     function farm_industry:Update()
         function farm_industry.Output()
-            farm_industry.out=farm_industry.pops[1].number*farm_industry.food_type.output 
+            farm_industry.out=math.floor(farm_industry.pops[1].number*throughtput(farm_industry.pops[1].number))
+            farm_industry.food_type.produced=farm_industry.food_type.produced+ farm_industry.out
         end
         function farm_industry.Income()
             farm_industry.income=farm_industry.out*farm_industry.food_type.value   
         end
 
         function farm_industry.Expences()
-            farm_industry.salary_expence=farm_industry.pops[1].number*farm_industry.pops[1].salary
-            farm_industry.pops[1].money=farm_industry.pops[1].money+farm_industry.salary_expence
+            farm_industry.salary_expence=farm_industry.pops[1].number*farm_industry.pop_salary
             farm_industry.expence=farm_industry.salary_expence
 
         end
@@ -58,6 +59,9 @@ function love.load()
             farm_industry.pops[2].money=farm_industry.pops[2].money+(farm_industry.dividends/farm_industry.pops[2].number)
         end
 
+        
+
+
         farm_industry.Output()
         farm_industry.Income()
         farm_industry.Expences()
@@ -68,24 +72,48 @@ function love.load()
 
 
     function throughtput(pop,cylces)
-        x=((1/1.01)^pop+(math.cos(pop)+1)/50+ math.random(0.1,0.2))*(multi);  
+        x=(1/1.01)^pop+0.1
         return x
     end
+    function ananas.Update( )
+        function ananas.value_change()
+            if ananas.produced >= ananas.sold then
+                ananas.value=ananas.value-(ananas.produced-ananas.sold)/ananas.produced
+                if ananas.value<0.1 then
+                    ananas.value=0.1
+
+                end
+            else
+                ananas.value=ananas.value+(ananas.sold-ananas.produced)/ananas.produced
+            end
+
+        end
+        ananas.value_change()
+
+    end
+        
+    
 
 
 
     function Pop.Update()
+        function Pop.Salary()
+            Pop.salary=Pop.work_industry.pop_salary
+            Pop.money=Pop.money+Pop.salary*Pop.number
+        end
         function Pop.Food()
-            Pop.food_need=Pop.number*2
+            Pop.food_need=Pop.number*food_consumed_pop
             Pop.food_need_cost=Pop.food_need*ananas.value
             if Pop.money > Pop.food_need_cost then
-                Pop.money = Pop.money - food_need_cost
+                Pop.money = Pop.money - Pop.food_need_cost
                 Pop.food_supply=100
+                ananas.sold=math.floor(ananas.sold+Pop.food_need)
             else
                 Pop.food_supply=((Pop.money/ananas.value)/Pop.food_need)*100
+                ananas.sold=math.floor(ananas.sold+(Pop.money/ananas.value))
                 Pop.money=0
             end
- 
+
         end
         function Pop.Change()
             if Pop.food_supply >80 then
@@ -93,14 +121,15 @@ function love.load()
             end
             if Pop.food_supply<40 then
                 Pop.number=Pop.number-1
+
             end
 
         end
+        Pop.Salary()
         Pop.Food()
         Pop.Change()
-
     end
-
+    
 end
 
 
@@ -115,10 +144,13 @@ end
 
 
 function love.update(dt)
-        farm_industry.Update()
 
         farm_industry.pops[1].Update()
-
+        farm_industry.Update()
+        ananas.Update()
+        --love.timer.sleep(0.5)
+        
+  
 
 
         cycles=cycles+1
@@ -136,9 +168,16 @@ function love.draw()
         love.graphics.print(Pops[i].number,font,100*i,50)
     end
     ]]
-    love.graphics.print(farm_industry.pops[1].food_need,font,400,50)
-    love.graphics.print(farm_industry.pops[2]['money'],font,400,100)
-    love.graphics.print(farm_industry.salary_expence,font,400,150)
+    love.graphics.print(farm_industry.pops[1].food_need_cost,font,400,50)
+    love.graphics.print(farm_industry.pops[1].number,font,400,100)
+    love.graphics.print(farm_industry.pops[1].food_supply,font,400,150)
+    love.graphics.print(farm_industry.pops[1].money,font,400,200)
+    love.graphics.print(ananas.sold,font,100,0)
+    love.graphics.print(ananas.produced,font,100,50)
+    love.graphics.print(string.format("%.2f", ananas.value ),font,100,100)
+    ananas.produced=0
+    ananas.sold=0
+
 
 end
 
