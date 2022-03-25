@@ -47,7 +47,12 @@ function love.load()
         end
 
         function farm_industry.Balance()
-            farm_industry.balance=farm_industry.income*farm_industry.expence
+            farm_industry.balance=farm_industry.income-farm_industry.expence
+            if farm_industry.balance>(farm_industry.income*0.1) then
+                farm_industry.pop_salary=farm_industry.pop_salary+0.1
+            else
+                farm_industry.pop_salary=farm_industry.pop_salary-0.1
+            end
         end
 
         function farm_industry.Capital()
@@ -72,19 +77,15 @@ function love.load()
 
 
     function throughtput(pop,cylces)
-        x=(1/1.01)^pop+0.1
+        x=(1/1.01)^pop+0.1+(cycles/10000)^3
         return x
     end
     function ananas.Update( )
         function ananas.value_change()
             if ananas.produced >= ananas.sold then
-                ananas.value=ananas.value-(ananas.produced-ananas.sold)/ananas.produced
-                if ananas.value<0.1 then
-                    ananas.value=0.1
-
-                end
+                ananas.value=ananas.value-((ananas.produced-ananas.sold)/ananas.produced)*ananas.value
             else
-                ananas.value=ananas.value+(ananas.sold-ananas.produced)/ananas.produced
+                ananas.value=ananas.value+((ananas.sold-ananas.produced)/ananas.produced)*ananas.value
             end
 
         end
@@ -116,11 +117,11 @@ function love.load()
 
         end
         function Pop.Change()
-            if Pop.food_supply >80 then
-                Pop.number=Pop.number+1
+            if Pop.food_supply >(math.random(50,70)+math.random()) then
+                Pop.number=Pop.number+math.random(1,10)
             end
-            if Pop.food_supply<40 then
-                Pop.number=Pop.number-1
+            if Pop.food_supply<(math.random(20,50)+math.random()) then
+                Pop.number=Pop.number-math.random(1,10)
 
             end
 
@@ -174,10 +175,16 @@ function love.draw()
     love.graphics.print(farm_industry.pops[1].money,font,400,200)
     love.graphics.print(ananas.sold,font,100,0)
     love.graphics.print(ananas.produced,font,100,50)
-    love.graphics.print(string.format("%.2f", ananas.value ),font,100,100)
+    love.graphics.print(string.format(ananas.value ),font,100,300)
+    love.graphics.print(string.format("%.2f", farm_industry.capital ),font,100,150)
+    love.graphics.scale(0.2, 0.2)
+    love.graphics.draw(mela, 20, 20,x)
     ananas.produced=0
     ananas.sold=0
 
 
 end
+
+
+
 
