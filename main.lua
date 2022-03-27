@@ -10,6 +10,7 @@ function love.load()
     food_type_price=3
     food_consumed_pop=0.5
     multi=3
+    efficency=1
     cycles=0
     coefficent_innovation=0.01
     coefficent_risparmio=0
@@ -28,7 +29,7 @@ function love.load()
     end
 
 
-    farm_industry= {pops=Pops, out=0 ,size=1, food_type=ananas, capital=0, dividends_rate=0.5, pop_salary=20}
+    farm_industry= {pops=Pops, out=0 ,size=1, food_type=ananas, capital=0, dividends_rate=0.05, pop_salary=20, efficency=1}
 
 
     function farm_industry:Update()
@@ -61,6 +62,11 @@ function love.load()
 
         function farm_industry.Investment()
             farm_industry.dividends=farm_industry.capital*farm_industry.dividends_rate
+            farm_industry.capital=farm_industry.capital-farm_industry.dividends
+            if farm_industry.capital>0 then
+                farm_industry.efficency=farm_industry.efficency+farm_industry.capital
+            end
+            
             farm_industry.pops[2].money=farm_industry.pops[2].money+(farm_industry.dividends/farm_industry.pops[2].number)
         end
 
@@ -77,7 +83,7 @@ function love.load()
 
 
     function throughtput(pop,cylces)
-        x=(1/1.01)^pop+0.1+(cycles/10000)^3
+        x=(1/1.01)^pop+0.1
         return x
     end
     function ananas.Update( )
@@ -117,10 +123,10 @@ function love.load()
 
         end
         function Pop.Change()
-            if Pop.food_supply >(math.random(50,70)+math.random()) then
+            if Pop.food_supply >(math.random(49,60)+math.random()) then
                 Pop.number=Pop.number+math.random(1,10)
             end
-            if Pop.food_supply<(math.random(20,50)+math.random()) then
+            if Pop.food_supply<(math.random(40,51)+math.random()) then
                 Pop.number=Pop.number-math.random(1,10)
 
             end
@@ -178,7 +184,6 @@ function love.draw()
     love.graphics.print(string.format(ananas.value ),font,100,300)
     love.graphics.print(string.format("%.2f", farm_industry.capital ),font,100,150)
     love.graphics.scale(0.2, 0.2)
-    love.graphics.draw(mela, 20, 20,x)
     ananas.produced=0
     ananas.sold=0
 
