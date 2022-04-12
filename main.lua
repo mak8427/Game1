@@ -8,6 +8,7 @@ function love.load()
     font=love.graphics.newFont(40)
     throughtput=1.0
     food_type_price=3
+    xy=false
     food_consumed_pop=0.5
     multi=3
     efficency=1
@@ -138,7 +139,20 @@ function love.load()
     end
     
 end
-
+--[[
+file = love.filesystem.File("test.lua", "a")
+file:write('Pop' .. "," .. 'Money')
+file:write('\n')
+file:write(farm_industry.pops[1].number .. "," .. farm_industry.pops[1].money)
+file:write('\n')
+file:close()
+]]
+f = love.filesystem.newFile("/Users/Mac/Desktop/game1/Simulation1/note.txt")
+f:open("w")
+for i = 1, 10 do
+    f:write("This is line "..i.."!\r\n")
+end
+f:close()
 
 
 
@@ -155,6 +169,7 @@ function love.update(dt)
         farm_industry.pops[1].Update()
         farm_industry.Update()
         ananas.Update()
+        --write_in_csv()
         --love.timer.sleep(0.5)
         
   
