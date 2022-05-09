@@ -1,7 +1,6 @@
 local foods = require "foods"
 
 
-
 function love.load()
     local foods = require "foods"
     pause = false
